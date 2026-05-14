@@ -1,184 +1,94 @@
 'use client';
 
-import { useState } from 'react';
-import { useAppStore } from '@/store/useAppStore';
-import { analyzeImage } from '@/lib/api/assetService';
-import { formatArea } from '@/lib/utils/formatters';
+import Link from 'next/link';
 
 export default function Home() {
-  const [file, setFile] = useState<File | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const { isLoading, setLoading, setError, error, setSummary, setGeojson, setWarnings, setImageId } = useAppStore();
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const files = e.dataTransfer.files;
-    if (files && files[0]) {
-      setFile(files[0]);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.currentTarget.files;
-    if (files && files[0]) {
-      setFile(files[0]);
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (!file) {
-      setError('Please select an image');
-      return;
-    }
-
-    try {
-      setError(null);
-      setLoading(true);
-
-      const formData = new FormData();
-      formData.append('image', file);
-
-      const result = await analyzeImage(formData);
-      setImageId(result.image_id);
-      setSummary(result.summary);
-      setGeojson(result.geojson);
-      setWarnings(result.warnings);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to analyze image');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const summary = useAppStore((state) => state.summary);
-  const warnings = useAppStore((state) => state.warnings);
-
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Upload Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Upload Card */}
-        <div className="lg:col-span-1">
-          <div className="bg-surface rounded-card shadow-soft border border-border p-6">
-            <h2 className="text-xl font-semibold mb-4 text-foreground">Upload Image</h2>
-
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-card p-6 text-center cursor-pointer transition-colors ${
-                isDragging
-                  ? 'border-primary bg-primary-soft'
-                  : 'border-border-strong bg-surface-elevated hover:border-primary'
-              }`}
-            >
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-                id="file-input"
-              />
-              <label htmlFor="file-input" className="cursor-pointer">
-                <div className="text-4xl mb-2">📁</div>
-                <p className="text-foreground font-medium">
-                  {file ? file.name : 'Drag image here or click'}
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Supported: JPG, PNG, GeoTIFF
-                </p>
-              </label>
+    <div className="min-h-screen bg-background">
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] gap-10 items-center">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-elevated px-3 py-1 text-xs text-muted-foreground">
+              Spatial Asset Manager
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
             </div>
+            <h1 className="mt-4 text-4xl sm:text-5xl font-semibold text-foreground">
+              AI-powered spatial intelligence for urban assets
+            </h1>
+            <p className="mt-4 text-base text-muted-foreground">
+              Upload satellite imagery, detect assets, and surface risks in a
+              single dashboard built for rapid decision-making.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center justify-center rounded-control bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft transition-all hover:-translate-y-0.5 hover:bg-primary-hover"
+              >
+                Open Dashboard
+              </Link>
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center justify-center rounded-control border border-border bg-surface-elevated px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-primary"
+              >
+                View Live Map
+              </Link>
+            </div>
+            <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[
+                { label: 'Assets monitored', value: '10K+', note: 'Across public infrastructure' },
+                { label: 'Avg. analysis time', value: '< 60s', note: 'Per satellite image' },
+                { label: 'Risk alerts', value: 'Multi-tier', note: 'High to low severity' },
+              ].map((item) => (
+                <div key={item.label} className="rounded-card border border-border bg-surface p-4 shadow-subtle">
+                  <div className="text-xs text-muted-foreground">{item.label}</div>
+                  <div className="mt-2 text-2xl font-semibold text-foreground">{item.value}</div>
+                  <div className="mt-1 text-xs text-muted-foreground">{item.note}</div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-            <button
-              onClick={handleSubmit}
-              disabled={!file || isLoading}
-              className="w-full mt-4 bg-primary hover:bg-primary-hover disabled:bg-muted text-primary-foreground disabled:text-surface font-medium py-2 px-4 rounded-control transition-colors"
-            >
-              {isLoading ? 'Analyzing...' : 'Analyze Image'}
-            </button>
-
-            {error && (
-              <div className="mt-4 p-3 bg-danger-soft border border-danger text-danger-foreground rounded-control">
-                {error}
-              </div>
-            )}
+          <div className="rounded-card border border-border bg-surface shadow-soft p-6">
+            <h2 className="text-lg font-semibold text-foreground">What you can do</h2>
+            <div className="mt-4 space-y-3">
+              {[
+                'Upload imagery and trigger AI analysis',
+                'Track asset counts and total area',
+                'Review warnings ranked by severity',
+                'Explore assets on an interactive map',
+              ].map((item) => (
+                <div key={item} className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <span className="mt-1 h-2 w-2 rounded-full bg-primary" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 rounded-card border border-border bg-surface-elevated px-4 py-3 text-xs text-muted-foreground">
+              Everything is centralized inside the dashboard so you never lose context.
+            </div>
           </div>
         </div>
 
-        {/* Results Section */}
-        <div className="lg:col-span-2">
-          {summary && (
-            <div className="bg-surface rounded-card shadow-soft border border-border p-6">
-              <h2 className="text-xl font-semibold mb-4 text-foreground">
-                Detection Summary
-              </h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.entries(summary).map(([category, data]) => (
-                  <div
-                    key={category}
-                    className="border border-border rounded-card bg-surface-elevated p-4 hover:shadow-subtle transition-shadow"
-                  >
-                    <p className="text-sm text-muted-foreground font-medium">{category}</p>
-                    <p className="text-2xl font-bold text-primary mt-1">
-                      {data.count}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Total Area: {formatArea(data.total_area_sqm)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              {warnings && warnings.length > 0 && (
-                <div className="mt-6 pt-6 border-t border-border">
-                  <h3 className="font-semibold text-foreground mb-3">Warnings</h3>
-                  <div className="space-y-2">
-                    {warnings.map((warning) => (
-                      <div
-                        key={warning.id}
-                        className={`p-3 rounded-card text-sm ${
-                          warning.severity === 'High'
-                            ? 'bg-danger-soft text-danger-foreground'
-                            : warning.severity === 'Medium'
-                            ? 'bg-warning-soft text-warning-foreground'
-                            : 'bg-accent-soft text-accent-foreground'
-                        }`}
-                      >
-                        <strong>{warning.issue_type}</strong> ({warning.severity})
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+        <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {[
+            {
+              title: 'Detection pipeline',
+              body: 'Automated extraction of buildings, roads, green cover, and water bodies with confidence scoring.',
+            },
+            {
+              title: 'Risk insights',
+              body: 'Surface encroachments, drainage blockages, and anomalies with severity-ranked alerts.',
+            },
+            {
+              title: 'Operational export',
+              body: 'Download GeoJSON for planning, GIS operations, and compliance reporting.',
+            },
+          ].map((item) => (
+            <div key={item.title} className="rounded-card border border-border bg-surface p-6 shadow-subtle">
+              <h3 className="text-base font-semibold text-foreground">{item.title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{item.body}</p>
             </div>
-          )}
-
-          {!summary && !isLoading && (
-            <div className="bg-surface rounded-card shadow-soft border border-border p-6 text-center text-muted-foreground">
-              <p className="text-lg">Upload an image to see analysis results</p>
-            </div>
-          )}
-
-          {isLoading && (
-            <div className="bg-surface rounded-card shadow-soft border border-border p-6 text-center">
-              <div className="inline-block">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-              <p className="mt-2 text-muted-foreground">Analyzing image...</p>
-            </div>
-          )}
+          ))}
         </div>
       </div>
     </div>

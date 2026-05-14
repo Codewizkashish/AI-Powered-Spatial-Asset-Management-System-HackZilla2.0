@@ -9,12 +9,26 @@ import type { Feature, FeatureCollection, Geometry } from 'geojson';
 
 interface MapViewProps {
   features?: GeoJSONFeature[];
+  highlightPoints?: {
+    id: string;
+    label: string;
+    lat: number;
+    lng: number;
+  }[];
+  focusedPoint?: {
+    id: string;
+    label: string;
+    lat: number;
+    lng: number;
+  } | null;
 }
 
-export function MapView({ features }: MapViewProps) {
+export function MapView({ features, highlightPoints, focusedPoint }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
+  const highlightLayerRef = useRef<L.Layer | null>(null);
+  const highlightMarkersRef = useRef<L.LayerGroup | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -31,6 +45,11 @@ export function MapView({ features }: MapViewProps) {
         attribution: '© OpenStreetMap contributors',
         maxZoom: 19,
       }).addTo(mapRef.current);
+
+      if (!mapRef.current.getPane('assetMarkers')) {
+        mapRef.current.createPane('assetMarkers');
+        mapRef.current.getPane('assetMarkers')!.style.zIndex = '650';
+      }
     }
 
     // Update GeoJSON layer when features change
@@ -69,6 +88,33 @@ export function MapView({ features }: MapViewProps) {
               );
               layer.bindPopup(popup);
             }
+
+            layer.on('click', () => {
+              if (!mapRef.current) return;
+
+              if (highlightLayerRef.current) {
+                mapRef.current.removeLayer(highlightLayerRef.current);
+              }
+
+              const layerWithBounds = layer as L.Polygon | L.Polyline;
+              const layerWithPoint = layer as L.Marker;
+              const bounds = 'getBounds' in layerWithBounds ? layerWithBounds.getBounds() : null;
+              const center = bounds
+                ? bounds.getCenter()
+                : 'getLatLng' in layerWithPoint
+                ? layerWithPoint.getLatLng()
+                : mapRef.current.getCenter();
+              const highlight = L.circleMarker(center, {
+                radius: 14,
+                color: '#f59e0b',
+                weight: 3,
+                fillColor: '#fde68a',
+                fillOpacity: 0.85,
+              });
+
+              highlight.addTo(mapRef.current);
+              highlightLayerRef.current = highlight;
+            });
           },
         }
       );
@@ -82,6 +128,64 @@ export function MapView({ features }: MapViewProps) {
       }
     }
   }, [features]);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    if (highlightMarkersRef.current) {
+      mapRef.current.removeLayer(highlightMarkersRef.current);
+    }
+
+    if (!highlightPoints || highlightPoints.length === 0) {
+      highlightMarkersRef.current = null;
+      return;
+    }
+
+    const markers = L.layerGroup([], { pane: 'assetMarkers' });
+    highlightPoints.forEach((point) => {
+      const marker = L.circleMarker([point.lat, point.lng], {
+        radius: 9,
+        color: '#0f766e',
+        weight: 3,
+        fillColor: '#5eead4',
+        fillOpacity: 0.95,
+        pane: 'assetMarkers',
+      });
+      marker.bindPopup(`<div class="text-sm font-semibold">${point.label}</div>`);
+      marker.on('click', () => {
+        marker.openPopup();
+        mapRef.current?.setView([point.lat, point.lng], 17);
+      });
+      markers.addLayer(marker);
+    });
+
+    markers.addTo(mapRef.current);
+    highlightMarkersRef.current = markers;
+
+    if (highlightPoints.length > 0) {
+      const bounds = L.latLngBounds(highlightPoints.map((point) => [point.lat, point.lng]));
+      mapRef.current.fitBounds(bounds, { padding: [40, 40] });
+    }
+  }, [highlightPoints]);
+
+  useEffect(() => {
+    if (!mapRef.current || !focusedPoint) return;
+
+    if (highlightLayerRef.current) {
+      mapRef.current.removeLayer(highlightLayerRef.current);
+    }
+
+    const highlight = L.circleMarker([focusedPoint.lat, focusedPoint.lng], {
+      radius: 14,
+      color: '#f59e0b',
+      weight: 3,
+      fillColor: '#fde68a',
+      fillOpacity: 0.85,
+    });
+    highlight.addTo(mapRef.current);
+    highlightLayerRef.current = highlight;
+    mapRef.current.setView([focusedPoint.lat, focusedPoint.lng], 18);
+  }, [focusedPoint]);
 
   return (
     <div
