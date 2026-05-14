@@ -302,6 +302,36 @@ export function useAssetAnalysis() {
 
 ---
 
+### Frontend Color Theme
+
+The frontend uses the **SpatialOps** theme. The source of truth is `frontend/src/app/globals.css`; every screen must use those semantic Tailwind tokens instead of one-off raw colors.
+
+| Use case | Token family |
+|---|---|
+| Page and text foundation | `background`, `foreground` |
+| Panels, cards, upload zones, empty states | `surface`, `surface-subtle`, `surface-elevated` |
+| Dividers and outlines | `border`, `border-strong` |
+| Secondary text and disabled UI | `muted`, `muted-foreground` |
+| Primary actions and map overlays | `primary`, `primary-hover`, `primary-soft`, `primary-foreground` |
+| Positive/natural asset states | `secondary`, `secondary-soft`, `secondary-foreground` |
+| Review/attention states | `accent`, `accent-soft`, `accent-foreground` |
+| System feedback | `danger`, `warning`, `info`, `success`, plus their `*-soft` and `*-foreground` variants |
+
+```tsx
+// Correct: semantic project tokens
+<button className="bg-primary hover:bg-primary-hover text-primary-foreground" />
+<section className="bg-surface border border-border text-foreground" />
+<p className="text-muted-foreground" />
+
+// Wrong: raw palette choices in product UI
+<button className="bg-blue-600 hover:bg-blue-700 text-white" />
+<section className="bg-white border-gray-200 text-gray-800" />
+```
+
+Raw hex values are allowed only in `globals.css` or when a third-party API requires a literal color value, such as a Leaflet GeoJSON style.
+
+---
+
 ## 4. Database / SQL Rules
 
 - All migrations tracked in `infra/schema.sql` — the single source of truth
