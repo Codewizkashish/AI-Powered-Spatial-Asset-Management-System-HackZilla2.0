@@ -1,92 +1,76 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MAP_CENTER_LAT, MAP_CENTER_LNG, DEFAULT_ZOOM } from '@/lib/constants';
-import type { GeoJSONFeature } from '@/types/api';
-import type { Feature, FeatureCollection, Geometry } from 'geojson';
+import { useAppStore } from '@/store/useAppStore';
+import type { GeoJSONFeature, Warning } from '@/types/api';
+import { AssetLayer } from './AssetLayer';
+import { Legend } from './Legend';
+import { MapControls } from './MapControls';
+import { WarningMarker } from './WarningMarker';
 
 interface MapViewProps {
   features?: GeoJSONFeature[];
+  warnings?: Warning[];
 }
 
-export function MapView({ features }: MapViewProps) {
+export function MapView({ features, warnings }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
-  const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
+  const [map, setMap] = useState<L.Map | null>(null);
+  const [featureBounds, setFeatureBounds] = useState<L.LatLngBounds | null>(null);
+  const storeGeojson = useAppStore((state) => state.geojson);
+  const storeWarnings = useAppStore((state) => state.warnings);
+  const mapFeatures = features ?? storeGeojson?.features ?? [];
+  const mapWarnings = warnings ?? storeWarnings;
+  const defaultCenter = useMemo<L.LatLngExpression>(
+    () => [MAP_CENTER_LAT, MAP_CENTER_LNG],
+    []
+  );
+
+  const handleBoundsChange = useCallback((bounds: L.LatLngBounds | null) => {
+    setFeatureBounds(bounds);
+  }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Initialize map only once
     if (!mapRef.current) {
-      mapRef.current = L.map(containerRef.current).setView(
-        [MAP_CENTER_LAT, MAP_CENTER_LNG],
-        DEFAULT_ZOOM
-      );
-
-      // Add tile layer
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19,
-      }).addTo(mapRef.current);
+      mapRef.current = L.map(containerRef.current, {
+        zoomControl: false,
+      }).setView(defaultCenter, DEFAULT_ZOOM);
+      setMap(mapRef.current);
     }
 
-    // Update GeoJSON layer when features change
-    if (features && features.length > 0) {
-      // Remove old layer
-      if (geoJsonLayerRef.current) {
-        mapRef.current?.removeLayer(geoJsonLayerRef.current);
-      }
+    return () => {
+      mapRef.current?.remove();
+      mapRef.current = null;
+      setMap(null);
+    };
+  }, [defaultCenter]);
 
-      const featureCollection: FeatureCollection<
-        Geometry,
-        GeoJSONFeature['properties']
-      > = {
-        type: 'FeatureCollection',
-        features: features as Feature<Geometry, GeoJSONFeature['properties']>[],
-      };
-
-      // Create new GeoJSON layer
-      geoJsonLayerRef.current = L.geoJSON(
-        featureCollection,
-        {
-          style: {
-            color: '#007c89',
-            weight: 2,
-            opacity: 0.7,
-            fillOpacity: 0.4,
-          },
-          onEachFeature: (feature, layer) => {
-            if (feature.properties) {
-              const popup = L.popup().setContent(
-                `<div class="text-sm">
-                  <p><strong>${feature.properties.category}</strong></p>
-                  <p>Confidence: ${(feature.properties.confidence * 100).toFixed(1)}%</p>
-                  <p>Area: ${feature.properties.area_sqm.toFixed(2)} m²</p>
-                </div>`
-              );
-              layer.bindPopup(popup);
-            }
-          },
-        }
-      );
-
-      geoJsonLayerRef.current.addTo(mapRef.current);
-
-      // Fit bounds to features
-      const bounds = geoJsonLayerRef.current.getBounds();
-      if (bounds.isValid()) {
-        mapRef.current.fitBounds(bounds, { padding: [50, 50] });
-      }
-    }
-  }, [features]);
+  useEffect(() => {
+    map?.invalidateSize();
+  }, [map]);
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full h-96 rounded-card shadow-soft border border-border"
-    />
+    <div className="relative min-h-[28rem] overflow-hidden rounded-card border border-border bg-surface shadow-soft">
+      <div ref={containerRef} className="h-[28rem] w-full" />
+      <AssetLayer
+        map={map}
+        features={mapFeatures}
+        onBoundsChange={handleBoundsChange}
+      />
+      <WarningMarker map={map} features={mapFeatures} warnings={mapWarnings} />
+      <MapControls
+        map={map}
+        defaultCenter={defaultCenter}
+        defaultZoom={DEFAULT_ZOOM}
+        featureBounds={featureBounds}
+      />
+      <Legend features={mapFeatures} warnings={mapWarnings} />
+    </div>
   );
 }
