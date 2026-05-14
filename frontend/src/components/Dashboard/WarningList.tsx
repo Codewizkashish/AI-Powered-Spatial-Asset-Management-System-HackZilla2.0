@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { ASSET_CATEGORIES } from '@/lib/constants';
 import { getSeverityBadgeColor } from '@/lib/utils/formatters';
@@ -8,13 +9,14 @@ import type { Warning } from '@/types/api';
 
 type AssetMeta = {
   label: string;
-  icon: JSX.Element;
+  icon: ReactNode;
 };
 
-const SEVERITY_ORDER: Record<Warning['severity'], number> = {
-  High: 0,
-  Medium: 1,
-  Low: 2,
+const SEVERITY_ORDER: Record<string, number> = {
+  Critical: 0,
+  High: 1,
+  Medium: 2,
+  Low: 3,
 };
 
 const CATEGORY_KEYWORDS = [
@@ -156,7 +158,8 @@ export default function WarningList() {
 
   const sortedWarnings = useMemo(() => {
     return [...warnings].sort((a, b) => {
-      const severityOrder = SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity];
+      const severityOrder =
+        (SEVERITY_ORDER[a.severity] ?? 99) - (SEVERITY_ORDER[b.severity] ?? 99);
       if (severityOrder !== 0) return severityOrder;
       return a.issue_type.localeCompare(b.issue_type);
     });
@@ -226,6 +229,9 @@ export default function WarningList() {
                 <div>
                   <p className="text-sm font-semibold text-foreground">{assetLabel}</p>
                   <p className="text-xs text-muted-foreground">{warning.issue_type}</p>
+                  {warning.description && (
+                    <p className="mt-1 text-xs text-muted-foreground">{warning.description}</p>
+                  )}
                 </div>
               </div>
 

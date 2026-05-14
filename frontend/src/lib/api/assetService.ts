@@ -25,16 +25,16 @@ export async function getAssetsInBbox(bbox: BBox): Promise<Asset[]> {
 }
 
 export async function getWarnings(): Promise<Warning[]> {
-  const response = await getApi().get<Warning[]>('/official/warnings');
-  return response.data;
+  const response = await getApi().get<Warning[] | { warnings: Warning[] }>('/official/warnings');
+  return Array.isArray(response.data) ? response.data : response.data.warnings;
 }
 
 export async function sendChatQuery(query: string, imageId: string): Promise<string> {
-  const response = await getApi().post<{ response: string }>('/public/chat', {
+  const response = await getApi().post<{ response?: string; reply?: string }>('/public/chat', {
     query,
     image_id: imageId,
   });
-  return response.data.response;
+  return response.data.response ?? response.data.reply ?? '';
 }
 
 export async function exportAssets(format: 'geojson' | 'csv'): Promise<Blob> {

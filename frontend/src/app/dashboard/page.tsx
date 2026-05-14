@@ -1,22 +1,25 @@
 'use client';
 
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { useMemo, useState } from 'react';
 import UploadZone from '@/components/Upload/UploadZone';
 import AssetSummary from '@/components/Dashboard/AssetSummary';
 import WarningList from '@/components/Dashboard/WarningList';
 import ExportButton from '@/components/Dashboard/ExportButton';
-import { MapView } from '@/components/MapView/MapView';
 import { useAppStore } from '@/store/useAppStore';
 import type { GeoJSONFeature } from '@/types/api';
+import type { AssetPoint } from '@/components/MapView/FocusLayer';
 
-type AssetPoint = {
-  id: string;
-  label: string;
-  category: string;
-  lat: number;
-  lng: number;
-};
+const MapView = dynamic(
+  () => import('@/components/MapView/MapView').then((module) => module.MapView),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="min-h-[28rem] rounded-card border border-border bg-surface-elevated" />
+    ),
+  }
+);
 
 const getFeatureCenter = (feature: GeoJSONFeature) => {
   const { geometry } = feature;

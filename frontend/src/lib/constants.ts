@@ -16,8 +16,14 @@ export const ASSET_CATEGORIES = [
 ];
 
 export const CATEGORY_COLORS: Record<string, string> = {
+  person: '#dc2626',
+  car: '#7c3aed',
+  bus: '#d97706',
+  truck: '#b7791f',
   Building: '#dc2626',
+  building: '#dc2626',
   Tree: '#15803d',
+  tree: '#15803d',
   Park: '#4d7c0f',
   'Water Body': '#2563eb',
   Road: '#475569',
@@ -28,6 +34,7 @@ export const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export const SEVERITY_COLORS: Record<string, string> = {
+  Critical: '#991b1b',
   High: '#dc2626',
   Medium: '#d97706',
   Low: '#b7791f',

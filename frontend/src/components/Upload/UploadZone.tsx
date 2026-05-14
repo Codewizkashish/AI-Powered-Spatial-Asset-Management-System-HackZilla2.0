@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { analyzeImage } from '@/lib/api/assetService';
+import { getApiErrorMessage } from '@/lib/api/client';
 import { useAppStore } from '@/store/useAppStore';
 
 type UploadStage = 'idle' | 'uploading' | 'processing' | 'done';
@@ -67,8 +68,8 @@ export default function UploadZone() {
     resetProgress();
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
     setIsDragging(true);
   };
 
@@ -76,19 +77,20 @@ export default function UploadZone() {
     setIsDragging(false);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault();
     setIsDragging(false);
-    const files = e.dataTransfer.files;
-    if (files && files[0]) {
-      handleFileSelected(files[0]);
+
+    const selectedFile = event.dataTransfer.files?.[0];
+    if (selectedFile) {
+      handleFileSelected(selectedFile);
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.currentTarget.files;
-    if (files && files[0]) {
-      handleFileSelected(files[0]);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.currentTarget.files?.[0];
+    if (selectedFile) {
+      handleFileSelected(selectedFile);
     }
   };
 
@@ -105,6 +107,7 @@ export default function UploadZone() {
       setProgress(25);
 
       const formData = new FormData();
+      formData.append('file', file);
       formData.append('image', file);
 
       setUploadStage('processing');
@@ -114,17 +117,26 @@ export default function UploadZone() {
       setImageId(result.image_id);
       setSummary(result.summary);
       setGeojson(result.geojson);
-      setWarnings(result.warnings);
+      setWarnings(result.warnings ?? []);
 
       setUploadStage('done');
       setProgress(100);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to analyze image.');
+      setError(getApiErrorMessage(err));
       resetProgress();
     } finally {
       setLoading(false);
     }
   };
+
+  const stageLabel =
+    uploadStage === 'done'
+      ? 'Ready'
+      : uploadStage === 'processing'
+      ? 'Processing'
+      : uploadStage === 'uploading'
+      ? 'Uploading'
+      : 'Idle';
 
   return (
     <div
@@ -138,21 +150,22 @@ export default function UploadZone() {
         className="absolute inset-x-0 top-0 h-1"
         style={{ background: 'linear-gradient(90deg, var(--primary), var(--info), var(--success))' }}
       />
-      <div className="flex items-center justify-between mb-4">
+
+      <div className="mb-4 flex items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold text-foreground">Upload Image</h2>
-          <p className="text-xs text-muted-foreground mt-1">
-            Drag and drop or browse your image for instant AI analysis.
+          <p className="mt-1 text-xs text-muted-foreground">
+            Add a satellite or drone frame for instant asset intelligence.
           </p>
         </div>
         <span
-          className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
+          className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold ${
             uploadStage === 'done'
               ? 'bg-success-soft text-success-foreground border-success'
               : uploadStage === 'processing'
               ? 'bg-warning-soft text-warning-foreground border-warning'
               : uploadStage === 'uploading'
-              ? 'bg-primary-soft text-primary-foreground border-primary'
+              ? 'bg-primary-soft text-primary border-primary'
               : 'bg-surface-elevated text-muted-foreground border-border'
           }`}
         >
@@ -161,13 +174,7 @@ export default function UploadZone() {
               uploadStage === 'uploading' || uploadStage === 'processing' ? 'animate-pulse' : ''
             }`}
           />
-          {uploadStage === 'done'
-            ? 'Ready'
-            : uploadStage === 'processing'
-            ? 'Processing'
-            : uploadStage === 'uploading'
-            ? 'Uploading'
-            : 'Idle'}
+          {stageLabel}
         </span>
       </div>
 
@@ -175,20 +182,12 @@ export default function UploadZone() {
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`relative border-2 border-dashed rounded-card p-6 text-center cursor-pointer transition-colors ${
+        className={`border-2 border-dashed rounded-card p-6 text-center cursor-pointer transition-colors ${
           isDragging
             ? 'border-primary bg-primary-soft shadow-subtle'
             : 'border-border-strong bg-surface-elevated hover:border-primary'
         }`}
       >
-        <div
-          className="absolute -right-8 -top-10 h-28 w-28 rounded-full opacity-20"
-          style={{ background: 'radial-gradient(circle, var(--primary) 0%, transparent 70%)' }}
-        />
-        <div
-          className="absolute -left-10 -bottom-12 h-28 w-28 rounded-full opacity-20"
-          style={{ background: 'radial-gradient(circle, var(--accent) 0%, transparent 70%)' }}
-        />
         <input
           type="file"
           accept="image/jpeg,image/png"
@@ -198,13 +197,17 @@ export default function UploadZone() {
         />
         <label htmlFor="file-input" className="cursor-pointer">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-surface shadow-subtle border border-border">
-            <span className="text-3xl">📁</span>
+            <svg className="h-8 w-8 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M4 17.5V6.5A2.5 2.5 0 0 1 6.5 4H10l2 2h5.5A2.5 2.5 0 0 1 20 8.5v9A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5Z" />
+              <path d="M12 16V9" />
+              <path d="m9.5 11.5 2.5-2.5 2.5 2.5" />
+            </svg>
           </div>
-          <p className="mt-3 text-foreground font-semibold truncate">
+          <p className="mt-3 truncate text-foreground font-semibold">
             {file ? file.name : 'Drag image here or click to browse'}
           </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            JPG or PNG • Max {MAX_FILE_SIZE_MB}MB
+          <p className="mt-1 text-xs text-muted-foreground">
+            JPG or PNG - Max {MAX_FILE_SIZE_MB}MB
           </p>
           <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-surface px-3 py-1 text-xs text-muted-foreground border border-border">
             <span className="h-1.5 w-1.5 rounded-full bg-primary" />
@@ -223,22 +226,13 @@ export default function UploadZone() {
               {Math.max(1, Math.round(file.size / 1024)).toLocaleString()} KB
             </span>
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => handleFileSelected(file)}
-              className="text-primary hover:text-primary-hover transition-colors"
-            >
-              Recheck
-            </button>
-            <button
-              type="button"
-              onClick={clearSelection}
-              className="text-danger-foreground hover:text-danger transition-colors"
-            >
-              Remove
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={clearSelection}
+            className="text-danger-foreground hover:text-danger transition-colors"
+          >
+            Remove
+          </button>
         </div>
       )}
 
@@ -252,14 +246,8 @@ export default function UploadZone() {
 
       {(uploadStage === 'uploading' || uploadStage === 'processing' || uploadStage === 'done') && (
         <div className="mt-4">
-          <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-            <span>
-              {uploadStage === 'uploading'
-                ? 'Uploading'
-                : uploadStage === 'processing'
-                ? 'Processing'
-                : 'Done'}
-            </span>
+          <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
+            <span>{uploadStage === 'done' ? 'Done' : stageLabel}</span>
             <span>{progress}%</span>
           </div>
           <div className="h-2 rounded-full bg-surface-elevated">

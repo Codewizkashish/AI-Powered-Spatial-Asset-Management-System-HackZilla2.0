@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { ASSET_CATEGORIES } from '@/lib/constants';
 import { formatArea, formatNumber } from '@/lib/utils/formatters';
@@ -9,7 +10,7 @@ type StatCardProps = {
   label: string;
   value: string;
   subtitle?: string;
-  icon: JSX.Element;
+  icon: ReactNode;
   accentChipClass: string;
   accentDotClass: string;
   accentStripClass: string;
@@ -142,7 +143,10 @@ export default function AssetSummary({ selectedCategory, onSelectCategory }: Ass
   const summary = useAppStore((state) => state.summary);
 
   const categoryStats = useMemo(() => {
-    return ASSET_CATEGORIES.map((category) => {
+    const dynamicCategories = Object.keys(summary ?? {});
+    const categories = Array.from(new Set([...ASSET_CATEGORIES, ...dynamicCategories]));
+
+    return categories.map((category) => {
       const data = summary?.[category];
       return {
         label: category,
