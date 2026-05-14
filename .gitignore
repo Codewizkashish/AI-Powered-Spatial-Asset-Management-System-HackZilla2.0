@@ -28,13 +28,14 @@ frontend/.env.production
 secrets.json
 
 # ML / model artifacts
+backend/.ultralytics/
 ml/weights/*.pt
 ml/weights/*.pth
 ml/weights/*.onnx
 ml/weights/*.engine
 ml/data/raw/
 ml/runs/
-models/
+/models/
 upload_cache/
 
 # Jupyter

@@ -243,7 +243,9 @@ export default function WarningList() {
                 >
                   {warning.severity}
                 </span>
-                <span className="text-xs text-muted-foreground">ID: {warning.asset_id.slice(0, 6)}...</span>
+                {warning.asset_id && (
+                  <span className="text-xs text-muted-foreground">ID: {warning.asset_id.slice(0, 6)}...</span>
+                )}
               </div>
             </div>
           );

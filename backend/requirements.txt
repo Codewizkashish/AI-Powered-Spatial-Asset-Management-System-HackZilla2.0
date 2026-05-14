@@ -11,3 +11,5 @@ opencv-python-headless
 httpx
 neo4j
 shapely
+google-generativeai
+groq
