@@ -1,0 +1,71 @@
+# ─── Python ──────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+venv/
+env/
+.venv/
+.env
+!.env.example
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ─── ML / Model Weights ──────────────────────────────────
+ml/weights/*.pt
+ml/weights/*.pth
+ml/weights/*.onnx
+ml/weights/*.engine
+ml/data/raw/
+ml/runs/
+*.pt
+*.pth
+
+# ─── Jupyter ─────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ─── Node / Frontend ─────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/build/
+frontend/.env.local
+frontend/.env.production
+.npm
+*.log
+yarn-error.log
+
+# ─── IDEs ────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ─── Testing ─────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+*.xml
+coverage/
+
+# ─── Uploads / Temp ──────────────────────────────────────
+backend/uploads/
+*.tmp
+*.temp
+temp/
+tmp/
+
+# ─── Secrets ─────────────────────────────────────────────
+.env
+*.pem
+*.key
+secrets.json

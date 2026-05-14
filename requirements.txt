@@ -1,0 +1,43 @@
+# FastAPI core
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+python-multipart==0.0.9
+
+# Database
+sqlalchemy[asyncio]==2.0.31
+asyncpg==0.29.0
+geoalchemy2==0.15.1
+alembic==1.13.2
+
+# Supabase client
+supabase==2.5.0
+
+# Neo4j
+neo4j==5.22.0
+
+# AI / ML
+ultralytics==8.2.60
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Geospatial
+shapely==2.0.5
+geopandas==1.0.0
+pyproj==3.6.1
+
+# Config
+pydantic==2.7.4
+pydantic-settings==2.3.4
+
+# File I/O
+aiofiles==23.2.1
+Pillow==10.4.0
+numpy==1.26.4
+
+# Google Gemini (optional)
+google-generativeai==0.7.2
+
+# Testing
+pytest==8.2.2
+pytest-asyncio==0.23.7
+httpx==0.27.0
