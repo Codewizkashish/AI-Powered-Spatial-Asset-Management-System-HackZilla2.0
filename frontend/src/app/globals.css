@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+:root {
+  /*
+   * SpatialOps theme
+   * Use these semantic tokens for all product UI. Keep raw hex values here so
+   * components can stay readable and the palette remains consistent.
+   */
+  --background: #f5f7f4;
+  --foreground: #17211f;
+  --surface: #ffffff;
+  --surface-subtle: #eef3ef;
+  --surface-elevated: #fafdff;
+  --border: #d6dfdc;
+  --border-strong: #9db0aa;
+  --muted: #63746f;
+  --muted-foreground: #495955;
+
+  --primary: #007c89;
+  --primary-hover: #00616b;
+  --primary-soft: #d9f3f4;
+  --primary-foreground: #ffffff;
+
+  --secondary: #4d7c0f;
+  --secondary-soft: #e4f3cf;
+  --secondary-foreground: #ffffff;
+
+  --accent: #b7791f;
+  --accent-soft: #fff1cf;
+  --accent-foreground: #2d1b05;
+
+  --danger: #dc2626;
+  --danger-soft: #fee2e2;
+  --danger-foreground: #7f1d1d;
+  --warning: #d97706;
+  --warning-soft: #ffedd5;
+  --warning-foreground: #7c2d12;
+  --info: #2563eb;
+  --info-soft: #dbeafe;
+  --info-foreground: #1e3a8a;
+  --success: #15803d;
+  --success-soft: #dcfce7;
+  --success-foreground: #14532d;
+
+  --shadow-soft: 0 16px 45px rgb(23 33 31 / 0.08);
+  --shadow-subtle: 0 6px 20px rgb(23 33 31 / 0.06);
+  --radius-card: 0.5rem;
+  --radius-control: 0.375rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-soft: var(--secondary-soft);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-info-foreground: var(--info-foreground);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-foreground: var(--success-foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --shadow-soft: var(--shadow-soft);
+  --shadow-subtle: var(--shadow-subtle);
+  --radius-card: var(--radius-card);
+  --radius-control: var(--radius-control);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #101816;
+    --foreground: #edf5f2;
+    --surface: #17211f;
+    --surface-subtle: #21302c;
+    --surface-elevated: #1c2a27;
+    --border: #33443f;
+    --border-strong: #50645e;
+    --muted: #a3b3ae;
+    --muted-foreground: #c5d1cd;
+
+    --primary: #3fc5cc;
+    --primary-hover: #73d7dc;
+    --primary-soft: #123f43;
+    --primary-foreground: #062527;
+
+    --secondary: #9fd66b;
+    --secondary-soft: #243b18;
+    --secondary-foreground: #102005;
+
+    --accent: #f2bd5c;
+    --accent-soft: #46310d;
+    --accent-foreground: #201303;
+
+    --danger: #f87171;
+    --danger-soft: #4b1717;
+    --danger-foreground: #fee2e2;
+    --warning: #fb923c;
+    --warning-soft: #4a2308;
+    --warning-foreground: #ffedd5;
+    --info: #93c5fd;
+    --info-soft: #172554;
+    --info-foreground: #dbeafe;
+    --success: #86efac;
+    --success-soft: #14351f;
+    --success-foreground: #dcfce7;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--primary-soft);
+  color: var(--foreground);
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  outline-offset: 2px;
+}
