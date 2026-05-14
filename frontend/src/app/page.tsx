@@ -1,9 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useAppStore } from '@/store/useAppStore';
 import { analyzeImage } from '@/lib/api/assetService';
 import { formatArea } from '@/lib/utils/formatters';
+
+const MapView = dynamic(
+  () => import('@/components/MapView/MapView').then((module) => module.MapView),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="min-h-[28rem] rounded-card border border-border bg-surface shadow-soft" />
+    ),
+  }
+);
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -118,6 +129,10 @@ export default function Home() {
 
         {/* Results Section */}
         <div className="lg:col-span-2">
+          <div className="mb-6">
+            <MapView />
+          </div>
+
           {summary && (
             <div className="bg-surface rounded-card shadow-soft border border-border p-6">
               <h2 className="text-xl font-semibold mb-4 text-foreground">
