@@ -1,42 +1,47 @@
+import uuid
+
 def generate_warnings(detected_assets):
     """
-    Analyzes detected assets and generates risk warnings for Railway Officials.
-    In a full production system, this uses PostGIS ST_DWithin to check distance to tracks.
-    For the hackathon MVP, we use rule-based logic based on asset area and confidence.
+    Analyzes detected assets and generates risk warnings.
+    Updated to use UUIDs so the frontend map can place warning markers exactly on the polygons.
     """
     warnings = []
     
     for asset in detected_assets:
-        category = asset["asset_category"]
-        area = asset["area_sqm"]
+        category = str(asset.get("asset_category", "")).lower()
+        area = asset.get("area_sqm", 0)
         
-        # Rule 1: Waterlogging Risk
-        # If a water body is very large or detected with high confidence near infrastructure
-        if category == "Water Body" and area > 10000: # Example threshold
+        # The frontend needs this to pin the warning to the map
+        asset_id = asset.get("id", str(uuid.uuid4())) 
+        
+        warning_base = {
+            "id": str(uuid.uuid4()),
+            "asset_id": asset_id,
+            "created_at": "2026-05-14T12:00:00Z" # You can make this dynamic later
+        }
+
+        # 1. Real YOLO object rules (For your live demo!)
+        if category in ["car", "bus", "truck"]:
             warnings.append({
-                "issue_type": "High Waterlogging Risk",
+                **warning_base,
+                "issue_type": "Unauthorized Vehicle Intrusion",
                 "severity": "High",
-                "description": f"Large water accumulation ({area} sqm) detected. Risk of track washout.",
-                "action_required": "Dispatch drone for drainage inspection."
+                "description": f"Vehicle detected in restricted zone."
             })
             
-        # Rule 2: Vegetation / Tree Fall Risk
-        elif category in ["Trees", "Green Cover"] and area > 5000:
+        elif category == "person":
             warnings.append({
-                "issue_type": "Vegetation Overgrowth",
-                "severity": "Medium",
-                "description": f"Dense vegetation canopy ({area} sqm) detected. Potential clearance issue.",
-                "action_required": "Schedule track-side trimming."
+                **warning_base,
+                "issue_type": "Human Track Trespassing",
+                "severity": "Critical",
+                "description": "Pedestrian detected on or near active railway lines."
             })
+
+        # 2. Satellite rules (If you use a custom model later)
+        elif category in ["water body", "river"] and area > 1000: 
+            warnings.append({**warning_base, "issue_type": "High Waterlogging Risk", "severity": "High"})
             
-        # Rule 3: Encroachment Risk
-        elif category in ["Building", "Properties"] and area > 500:
-            # We assume for the MVP that buildings in the railway frame need verification
-            warnings.append({
-                "issue_type": "Potential Encroachment",
-                "severity": "High",
-                "description": f"Unverified structure ({area} sqm) detected in surveillance zone.",
-                "action_required": "Cross-reference with DIGIT Urban Asset Registry."
-            })
+        elif category in ["building", "properties"]:
+            warnings.append({**warning_base, "issue_type": "Potential Encroachment", "severity": "High"})
 
     return warnings
