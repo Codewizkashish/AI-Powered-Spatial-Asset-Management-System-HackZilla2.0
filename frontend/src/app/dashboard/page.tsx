@@ -125,6 +125,13 @@ export default function DashboardPage() {
           ) : (
             <div className="rounded-card border border-border bg-surface shadow-soft p-3">
               <MapView
+                key={
+                  geojson
+                    ? `geojson-${geojson.features.length}-${geojson.features
+                        .map((feature) => feature.id ?? feature.properties?.id ?? '')
+                        .join(',')}`
+                    : 'geojson-empty'
+                }
                 features={geojson?.features}
                 highlightPoints={filteredPoints}
                 focusedPoint={focusedAsset}
