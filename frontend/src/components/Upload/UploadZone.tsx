@@ -90,6 +90,7 @@ export default function UploadZone() {
     if (files && files[0]) {
       handleFileSelected(files[0]);
     }
+    e.currentTarget.value = '';
   };
 
   const handleSubmit = async () => {
