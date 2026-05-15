@@ -37,8 +37,9 @@ export interface Warning {
   id?: string;
   asset_id: string;
   issue_type: string;
-  severity: 'High' | 'Medium' | 'Low';
+  severity: 'Critical' | 'High' | 'Medium' | 'Low';
   created_at?: string;
+  description?: string;
   latitude?: number;
   longitude?: number;
   lat?: number;

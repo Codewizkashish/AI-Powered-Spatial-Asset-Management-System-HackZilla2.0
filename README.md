@@ -1,143 +1,99 @@
-# 🛰️ AI Spatial Asset Management System
-**AI-powered detection and classification of urban assets from satellite, drone, and aerial imagery.**
+# AI-Powered Spatial Asset Management System
 
-Built for Indian Railways / Urban Governance | eGov Foundation DIGIT Platform
+AI-powered detection and classification of urban and railway assets from satellite, drone, and aerial imagery.
 
----
+Built for a hackathon demo around upload, AI detection, map visualization, risk warnings, and GeoJSON export.
 
-## 📋 What This Does
+## What It Does
 
-Ingests aerial/satellite images → Detects urban assets (buildings, water bodies, roads, drains, trees, parks) using YOLOv8 → Stores spatial data in PostGIS → Surfaces interactive map overlays with risk/encroachment alerts.
+The system ingests imagery, detects assets such as buildings, trees, parks, water bodies, roads, drains, parking, waste, and solar panels, stores/serves spatial results through the backend, and presents them in a Next.js dashboard with Leaflet map overlays.
 
----
-
-## 🏗️ Stack at a Glance
+## Stack
 
 | Layer | Technology |
 |---|---|
-| AI / Detection | YOLOv8-seg (Ultralytics) |
-| Backend | FastAPI + Python |
-| Spatial DB | PostGIS via Supabase |
-| Graph DB | Neo4j AuraDB |
-| Frontend | Next.js 15 + Leaflet.js |
-| Geometry | Shapely + GeoPandas |
-| LLM (optional) | Google Gemini API |
+| Frontend | Next.js, TypeScript, Tailwind CSS, Leaflet |
+| Backend | FastAPI, Python, Pydantic |
+| AI / Detection | YOLOv8 segmentation |
+| Spatial | PostGIS / Supabase-ready contracts |
+| Optional Intelligence | Neo4j, Gemini |
 
----
+## Repository Structure
 
-## 📁 Repository Structure
-
-```
-spatial-asset-system/
-├── backend/        # FastAPI app
-├── frontend/       # React app
-├── ml/             # YOLOv8 training scripts
-├── infra/          # DB schema, Neo4j setup
-└── docs/           # All architecture and project docs
+```text
+backend/   FastAPI app, routes, services, configuration
+frontend/  Next.js dashboard and map UI
+docs/      Architecture, migration, coding, and project notes
 ```
 
----
+## API Contract
 
-## 🚀 Quick Start
+Frontend expects:
 
-### 1. Clone
-```bash
-git clone https://github.com/<your-org>/spatial-asset-system.git
-cd spatial-asset-system
+- `POST /api/v1/public/analyze`
+- `POST /api/v1/public/chat`
+- `GET /api/v1/official/assets`
+- `GET /api/v1/official/warnings`
+- `GET /api/v1/official/export?format=geojson`
+
+The upload response should include:
+
+```json
+{
+  "image_id": "uuid",
+  "summary": {
+    "Building": { "count": 10, "total_area_sqm": 1200 }
+  },
+  "geojson": {
+    "type": "FeatureCollection",
+    "features": []
+  },
+  "warnings": []
+}
 ```
 
-### 2. Backend Setup
+For best map warning placement, each warning `asset_id` should match `feature.properties.asset_id` or `feature.properties.id`.
+
+## Backend Quick Start
+
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
+venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env
-# Fill in your Supabase, Neo4j, and Gemini credentials in .env
-uvicorn main:app --reload
+python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 3. Frontend Setup
+API docs: `http://localhost:8000/docs`
+
+## Frontend Quick Start
+
 ```bash
 cd frontend
 npm install
-cp .env.example .env.local
-# Set NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1
+copy .env.example .env.local
 npm run dev
 ```
 
-### 4. Database Setup
-```bash
-# Run the PostGIS schema in your Supabase SQL editor:
-cat infra/schema.sql
+Frontend: `http://localhost:3000`
 
-# Run Neo4j setup queries in AuraDB browser:
-cat infra/neo4j_setup.cypher
+Dashboard: `http://localhost:3000/dashboard`
+
+Expected frontend environment:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1
 ```
 
-### 5. ML Model
-```bash
-cd ml
-# Download base YOLOv8 weights (not committed to git)
-python -c "from ultralytics import YOLO; YOLO('yolov8n-seg.pt')"
-# Fine-tune on urban dataset:
-python train.py
-```
+## Demo Flow
 
----
+1. Open `/dashboard`.
+2. Upload JPG/PNG imagery.
+3. Backend returns detected asset GeoJSON, summary counts, and warnings.
+4. Frontend renders polygons, warning markers, category summary, and export.
 
-## 📖 Documentation
+## Notes
 
-| Doc | Purpose |
-|---|---|
-| [PROJECT_CONTEXT.md](docs/PROJECT_CONTEXT.md) | Project memory, stack, flows, dependencies |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Layers, services, data flow, module structure |
-| [CODING_RULES.md](docs/CODING_RULES.md) | Naming conventions, patterns, formatting rules |
-| [FEATURE_LOG.md](docs/FEATURE_LOG.md) | Every feature, change, fix, and decision tracked |
-
-> **Read all four docs before writing any code.**
-
----
-
-## 🔑 Environment Variables
-
-See `backend/.env.example` for all required variables.
-
-Never commit real credentials. Share them with teammates via a secure channel.
-
----
-
-## 🌿 Git Workflow
-
-```
-main  ←  stable releases only
-dev   ←  all PRs target here
-
-feature/<name>   new features
-fix/<name>       bug fixes
-refactor/<name>  restructuring
-```
-
-**Always create a branch. Always PR into `dev`. Never push directly to `main`.**
-
----
-
-## 🏁 Hackathon Phase Plan
-
-| Phase | Hours | Milestone |
-|---|---|---|
-| 1 | 0–10h | POST /analyze pipeline + frontend polygon overlay |
-| 2 | 10–15h | Neo4j risks + warnings API |
-| 3 | 15–18h | Official dashboard + export |
-| 4 | 18–20h | Chat LLM + bonus features |
-
----
-
-## 👥 Team
-
-| Role | Owner |
-|---|---|
-| ML / Vision Engine | |
-| Backend / API | |
-| Frontend / Map UI | |
-| DB / Infra | |
+- Do not commit real secrets.
+- Keep backend contracts stable for the frontend dashboard.
+- Use the semantic frontend theme tokens from `frontend/src/app/globals.css`.

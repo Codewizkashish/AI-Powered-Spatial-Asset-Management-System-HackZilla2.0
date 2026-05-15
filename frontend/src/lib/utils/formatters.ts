@@ -1,10 +1,13 @@
 export function formatArea(sqm: number): string {
-  if (sqm < 1000) {
-    return `${sqm.toFixed(2)} m²`;
-  } else if (sqm < 1000000) {
-    return `${(sqm / 1000).toFixed(2)} km²`;
+  if (sqm < 10000) {
+    return `${sqm.toFixed(2)} sqm`;
   }
-  return `${(sqm / 1000000).toFixed(2)} Mm²`;
+
+  if (sqm < 1000000) {
+    return `${(sqm / 10000).toFixed(2)} ha`;
+  }
+
+  return `${(sqm / 1000000).toFixed(2)} sq km`;
 }
 
 export function formatNumber(num: number): string {
@@ -23,6 +26,7 @@ export function formatDate(date: string | Date): string {
 
 export function getSeverityBadgeColor(severity: string): string {
   const colors: Record<string, string> = {
+    Critical: 'bg-danger text-primary-foreground',
     High: 'bg-danger-soft text-danger-foreground',
     Medium: 'bg-warning-soft text-warning-foreground',
     Low: 'bg-accent-soft text-accent-foreground',

@@ -33,6 +33,9 @@ export function MapControls({
 
   useEffect(() => {
     if (!map) return;
+    
+    // Ensure the map container is in the DOM before adding controls
+    if (!map.getContainer().parentElement) return;
 
     tileLayerRef.current = L.tileLayer(OSM_TILE_URL, {
       attribution: OSM_ATTRIBUTION,

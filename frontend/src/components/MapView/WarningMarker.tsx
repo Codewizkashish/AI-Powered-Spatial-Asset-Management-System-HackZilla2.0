@@ -12,7 +12,8 @@ interface WarningMarkerProps {
   warnings: Warning[];
 }
 
-const SEVERITY_RADIUS: Record<Warning['severity'], number> = {
+const SEVERITY_RADIUS: Record<string, number> = {
+  Critical: 14,
   High: 12,
   Medium: 10,
   Low: 8,
@@ -52,6 +53,7 @@ export function WarningMarker({
         `<div class="min-w-44 text-sm">
           <p class="font-semibold">${escapeHtml(warning.issue_type)}</p>
           <p>Severity: ${escapeHtml(warning.severity)}</p>
+          <p>${escapeHtml(warning.description)}</p>
           <p>Asset ID: ${escapeHtml(warning.asset_id)}</p>
         </div>`
       );

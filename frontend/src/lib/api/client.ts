@@ -26,15 +26,35 @@ export function getApiClient(): AxiosInstance {
       (error) => Promise.reject(error)
     );
 
-    // Add response interceptor for error handling
     apiClient.interceptors.response.use(
       (response) => response,
-      (error) => {
-        console.error('API Error:', error.response?.data || error.message);
-        return Promise.reject(error);
-      }
+      (error) => Promise.reject(error)
     );
   }
 
   return apiClient;
+}
+
+export function getApiErrorMessage(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    if (!error.response) {
+      return `Backend is not reachable at ${API_BASE_URL}. Start the FastAPI server or check CORS/API URL.`;
+    }
+
+    const detail = error.response.data?.detail;
+    if (typeof detail === 'string') {
+      return detail;
+    }
+
+    if (Array.isArray(detail)) {
+      return detail
+        .map((item) => item?.msg)
+        .filter(Boolean)
+        .join(', ');
+    }
+
+    return `Request failed with status ${error.response.status}.`;
+  }
+
+  return error instanceof Error ? error.message : 'Something went wrong.';
 }

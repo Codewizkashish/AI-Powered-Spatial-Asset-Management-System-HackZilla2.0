@@ -1,4 +1,4 @@
-# ─── Python ──────────────────────────────────────────────
+# Python
 __pycache__/
 *.py[cod]
 *.pyo
@@ -13,36 +13,46 @@ build/
 venv/
 env/
 .venv/
-.env
-!.env.example
 pip-log.txt
 pip-delete-this-directory.txt
 
-# ─── ML / Model Weights ──────────────────────────────────
+# Environments and secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+frontend/.env.local
+frontend/.env.production
+*.pem
+*.key
+secrets.json
+
+# ML / model artifacts
+backend/.ultralytics/
 ml/weights/*.pt
 ml/weights/*.pth
 ml/weights/*.onnx
 ml/weights/*.engine
 ml/data/raw/
 ml/runs/
-*.pt
-*.pth
+/models/
+upload_cache/
 
-# ─── Jupyter ─────────────────────────────────────────────
+# Jupyter
 .ipynb_checkpoints/
 *.ipynb
 
-# ─── Node / Frontend ─────────────────────────────────────
+# Node / frontend
 node_modules/
+frontend/node_modules/
+frontend/.next/
 frontend/dist/
 frontend/build/
-frontend/.env.local
-frontend/.env.production
 .npm
 *.log
 yarn-error.log
 
-# ─── IDEs ────────────────────────────────────────────────
+# IDEs and OS
 .vscode/
 .idea/
 *.swp
@@ -50,22 +60,17 @@ yarn-error.log
 .DS_Store
 Thumbs.db
 
-# ─── Testing ─────────────────────────────────────────────
+# Testing and coverage
 .pytest_cache/
+.mypy_cache/
 .coverage
 htmlcov/
-*.xml
 coverage/
+*.xml
 
-# ─── Uploads / Temp ──────────────────────────────────────
+# Uploads / temp
 backend/uploads/
 *.tmp
 *.temp
 temp/
 tmp/
-
-# ─── Secrets ─────────────────────────────────────────────
-.env
-*.pem
-*.key
-secrets.json

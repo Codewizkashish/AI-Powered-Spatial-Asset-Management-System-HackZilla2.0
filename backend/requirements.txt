@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+python-multipart
+sqlalchemy
+geoalchemy2
+psycopg2-binary
+pydantic
+pydantic-settings
+ultralytics
+opencv-python-headless
+httpx
+neo4j
+shapely
+google-generativeai
+groq
