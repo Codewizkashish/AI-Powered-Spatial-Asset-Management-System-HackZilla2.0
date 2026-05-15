@@ -15,6 +15,18 @@ export const ASSET_CATEGORIES = [
   'Solar Panel',
 ];
 
+export const CATEGORY_COLORS: Record<string, string> = {
+  Building: '#dc2626',
+  Tree: '#15803d',
+  Park: '#4d7c0f',
+  'Water Body': '#2563eb',
+  Road: '#475569',
+  Drain: '#007c89',
+  Parking: '#7c3aed',
+  Waste: '#b7791f',
+  'Solar Panel': '#0891b2',
+};
+
 export const SEVERITY_COLORS: Record<string, string> = {
   High: '#dc2626',
   Medium: '#d97706',

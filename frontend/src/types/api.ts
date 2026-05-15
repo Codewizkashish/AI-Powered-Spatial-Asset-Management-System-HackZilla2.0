@@ -1,13 +1,16 @@
 export interface GeoJSONFeature {
   type: 'Feature';
   geometry: {
-    type: 'Polygon' | 'Point' | 'LineString';
+    type: 'Polygon' | 'MultiPolygon' | 'Point' | 'LineString';
     coordinates: number[][][] | number[][] | number[];
   };
   properties: {
+    id?: string;
+    asset_id?: string;
     category: string;
     confidence: number;
     area_sqm: number;
+    [key: string]: string | number | boolean | null | undefined;
   };
 }
 
@@ -31,11 +34,15 @@ export interface Asset {
 }
 
 export interface Warning {
-  id: string;
+  id?: string;
   asset_id: string;
   issue_type: string;
   severity: 'High' | 'Medium' | 'Low';
-  created_at: string;
+  created_at?: string;
+  latitude?: number;
+  longitude?: number;
+  lat?: number;
+  lng?: number;
 }
 
 export interface BBox {
