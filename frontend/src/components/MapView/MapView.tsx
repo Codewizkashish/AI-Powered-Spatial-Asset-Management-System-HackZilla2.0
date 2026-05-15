@@ -169,11 +169,14 @@ export function MapView({ features, highlightPoints, focusedPoint }: MapViewProp
   }, [highlightPoints]);
 
   useEffect(() => {
-    if (!mapRef.current || !focusedPoint) return;
+    if (!mapRef.current) return;
 
     if (highlightLayerRef.current) {
       mapRef.current.removeLayer(highlightLayerRef.current);
+      highlightLayerRef.current = null;
     }
+
+    if (!focusedPoint) return;
 
     const highlight = L.circleMarker([focusedPoint.lat, focusedPoint.lng], {
       radius: 14,
