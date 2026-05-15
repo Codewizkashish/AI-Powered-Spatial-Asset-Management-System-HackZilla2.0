@@ -151,7 +151,10 @@ export function MapView({ features, highlightPoints, focusedPoint }: MapViewProp
         fillOpacity: 0.95,
         pane: 'assetMarkers',
       });
-      marker.bindPopup(`<div class="text-sm font-semibold">${point.label}</div>`);
+      const popupContent = document.createElement('div');
+      popupContent.className = 'text-sm font-semibold';
+      popupContent.textContent = point.label;
+      marker.bindPopup(popupContent);
       marker.on('click', () => {
         marker.openPopup();
         mapRef.current?.setView([point.lat, point.lng], 17);
